@@ -159,6 +159,10 @@ function renderRulesSummary(
     rules.push(
       `<span class="rl">Filtering:</span> <span class="rv">Toxic content</span>`,
     );
+  if (f?.hideAdultContent)
+    rules.push(
+      `<span class="rl">Filtering:</span> <span class="rv">Adult content</span>`,
+    );
 
   if (rules.length === 0) {
     list.innerHTML = '<div class="no-rules">No active filters</div>';
