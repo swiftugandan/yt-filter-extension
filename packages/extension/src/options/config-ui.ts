@@ -52,6 +52,7 @@ export async function saveConfig(): Promise<void> {
   f.hideAds = ($("#hideAds") as HTMLInputElement).checked;
   f.hideClickbait = ($("#hideClickbait") as HTMLInputElement).checked;
   f.hideToxic = ($("#hideToxic") as HTMLInputElement).checked;
+  f.hideAdultContent = ($("#hideAdultContent") as HTMLInputElement).checked;
 
   const minVal = (($("#minDur") as HTMLInputElement).value || "").trim();
   const maxVal = (($("#maxDur") as HTMLInputElement).value || "").trim();
@@ -114,6 +115,8 @@ export function populateUI(cfg: YTFilterConfig): void {
   ($("#hideAds") as HTMLInputElement).checked = f.hideAds ?? true;
   ($("#hideClickbait") as HTMLInputElement).checked = f.hideClickbait ?? true;
   ($("#hideToxic") as HTMLInputElement).checked = f.hideToxic ?? true;
+  ($("#hideAdultContent") as HTMLInputElement).checked =
+    f.hideAdultContent ?? false;
 }
 
 export function setupClassifierBackendUI(): void {

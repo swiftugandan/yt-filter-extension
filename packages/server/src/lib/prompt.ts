@@ -9,6 +9,8 @@ const CATEGORY_DESCRIPTIONS: Record<string, string> = {
     "Titles using psychological manipulation to pressure engagement. Key signals: artificial scarcity ('only 2 left'), fake urgency ('expires in 10 minutes'), social proof pressure ('50,000 people already'), guilt/threat-based engagement ('share or else').",
   fear: "Titles exploiting fear and anxiety for views by catastrophizing or doom-mongering without informational value. Key signals: apocalyptic framing, vague existential threats, 'prepare now' urgency without actionable info.",
   scam: "Titles promoting get-rich-quick schemes, fake money methods, or too-good-to-be-true financial claims. Key signals: guaranteed income, 'passive income secret', 'no experience needed', unrealistic earning claims.",
+  adult_content:
+    "Titles indicating content inappropriate for children including graphic violence, sexual themes, drug/alcohol use, horror, gambling, or other adult-only material. Key signals: explicit age markers (18+, NSFW), graphic violence language, sexual content references, drug/alcohol experiences, horror/gore themes, gambling.",
 };
 
 const categoryDefs = Object.entries(POSITIVE_ARCHETYPES)
@@ -50,5 +52,5 @@ ${cleanExamples}
 Respond with ONLY a JSON object (no markdown, no explanation). Use this exact structure:
 {"results": [{"title": "original title", "flagged": true, "categories": [{"category": "clickbait", "confidence": 0.85, "reason": "curiosity gap with vague teaser"}]}, {"title": "clean title", "flagged": false, "categories": []}]}
 
-Every input title must appear in the output array in the same order. The "category" field must be one of: clickbait, toxic, dark_pattern, fear, scam.
+Every input title must appear in the output array in the same order. The "category" field must be one of: clickbait, toxic, dark_pattern, fear, scam, adult_content.
 `;

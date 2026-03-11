@@ -10,6 +10,7 @@ const categoryNameSchema = z.enum([
   "dark_pattern",
   "fear",
   "scam",
+  "adult_content",
 ]);
 
 const categoryMatchSchema = z.object({

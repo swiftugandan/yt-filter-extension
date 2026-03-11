@@ -155,6 +155,63 @@ export const RE_DARK_ENGAGEMENT = new RegExp(
   "i",
 );
 
+// ── Adult content patterns ──
+export const RE_ADULT_VIOLENCE = new RegExp(
+  [
+    "\\b(gore|gory|brutal|graphic)\\s+(violence|fight|death|murder)",
+    "\\b(stabbing|shooting|massacre|execution|torture)\\b",
+    "\\bbloodbath\\b",
+    "\\bgraphic\\s+content\\b",
+    "\\b(fight|brawl)\\s+(compilation|caught on camera)",
+  ].join("|"),
+  "i",
+);
+
+export const RE_ADULT_SEXUAL = new RegExp(
+  [
+    "\\b(18\\+|nsfw|xxx|porn|nude|naked)\\b",
+    "\\b(sexy|seductive|sensual)\\s+(haul|try.?on|dance|challenge)",
+    "\\bgone\\s+sexual\\b",
+    "\\bhot\\s+(girls?|boys?|guys?|women|men)\\b",
+    "\\b(strip|striptease|lingerie)\\s+(haul|try.?on|challenge)",
+    "\\bonlyfans\\b",
+    "\\badult\\s+only\\b",
+    "\\bbikini\\s+haul\\b",
+  ].join("|"),
+  "i",
+);
+
+export const RE_ADULT_DRUGS = new RegExp(
+  [
+    "\\b(getting|got)\\s+(drunk|wasted|high|stoned|hammered|smashed|blazed)",
+    "\\b(drug|acid|shroom|dmt|lsd|cocaine|meth|heroin)\\s+trip",
+    "\\bsmoking\\s+(weed|crack|meth)\\b",
+    "\\bdrinking\\s+game\\b",
+    "\\bdrunk\\s+(challenge|prank|fails?)\\b",
+  ].join("|"),
+  "i",
+);
+
+export const RE_ADULT_HORROR = new RegExp(
+  [
+    "\\b(creepypasta|jumpscare|jump\\s+scare)\\b",
+    "\\bnightmare\\s+fuel\\b",
+    "\\b(real|actual)\\s+(ghost|paranormal|haunting|demon)",
+    "\\bsleep\\s+paralysis\\b",
+    "\\b(serial\\s+killer|crime\\s+scene|autopsy|dead\\s+body)\\b",
+    "\\b(terrifying|traumatizing|disturbing)\\s+(true|real|footage)",
+  ].join("|"),
+  "i",
+);
+
+export const RE_ADULT_GAMBLING = new RegExp(
+  [
+    "\\b(gambling|betting|slot\\s+machine|poker|blackjack)\\b.*\\b(win|lost?e?|all.in)",
+    "\\bcasino\\s+(challenge|stream|haul)",
+  ].join("|"),
+  "i",
+);
+
 export function matchReasons(
   meta: VideoMetadata,
   config: YTFilterConfig | null,
@@ -209,6 +266,15 @@ export function matchReasons(
       reasons.push("dark pattern: false urgency");
     else if (RE_DARK_ENGAGEMENT.test(t))
       reasons.push("dark pattern: engagement bait");
+  }
+
+  if (f.hideAdultContent) {
+    const t = meta.title;
+    if (RE_ADULT_VIOLENCE.test(t)) reasons.push("adult: violence/gore");
+    else if (RE_ADULT_SEXUAL.test(t)) reasons.push("adult: sexual content");
+    else if (RE_ADULT_DRUGS.test(t)) reasons.push("adult: drugs/alcohol");
+    else if (RE_ADULT_HORROR.test(t)) reasons.push("adult: horror/disturbing");
+    else if (RE_ADULT_GAMBLING.test(t)) reasons.push("adult: gambling");
   }
 
   if (meta.duration !== null) {

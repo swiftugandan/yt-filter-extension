@@ -12,6 +12,7 @@ export interface FilterRules {
   hideAds: boolean;
   hideClickbait: boolean;
   hideToxic: boolean;
+  hideAdultContent: boolean;
   minDuration: number | null;
   maxDuration: number | null;
 }
@@ -46,6 +47,7 @@ export const DEFAULT_CONFIG: YTFilterConfig = {
     hideAds: true,
     hideClickbait: true,
     hideToxic: true,
+    hideAdultContent: false,
   },
   stats: {
     totalHidden: 0,

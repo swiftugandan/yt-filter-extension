@@ -3,7 +3,8 @@ export type CategoryName =
   | "toxic"
   | "dark_pattern"
   | "fear"
-  | "scam";
+  | "scam"
+  | "adult_content";
 
 export interface ClassifyRequest {
   titles: string[];

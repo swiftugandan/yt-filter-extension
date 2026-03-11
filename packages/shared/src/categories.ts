@@ -4,6 +4,7 @@ export const CATEGORY_THRESHOLDS: Record<string, number> = {
   dark_pattern: 0.32,
   fear: 0.33,
   scam: 0.33,
+  adult_content: 0.34,
 };
 
 export const MARGIN = 0.05;
@@ -75,6 +76,20 @@ export const POSITIVE_ARCHETYPES: Record<string, string[]> = {
     "I made ten thousand dollars doing nothing",
     "Work from home earn six figures easily",
     "Financial freedom overnight no experience needed",
+  ],
+  adult_content: [
+    "Brutal street fight caught on camera graphic violence",
+    "Scary horror movie moments that will traumatize you",
+    "True crime serial killer documentary disturbing details",
+    "Getting blackout drunk challenge gone wrong",
+    "Drug trip experience what it's really like",
+    "Sexy bikini haul try on 18+ only",
+    "Creepypasta horror story that will give you nightmares",
+    "Real ghost sightings terrifying paranormal activity",
+    "Gambling all my money at the casino betting big",
+    "Extreme gore and violence compilation not for kids",
+    "Prank gone sexual in public gone wrong",
+    "Drunk party fails people getting wasted",
   ],
 };
 
