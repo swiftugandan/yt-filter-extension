@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <rect width="32" height="32" rx="8" fill="#0a0a0a"/>
+  <g transform="translate(4, 5)">
+    <!-- Funnel / filter shape -->
+    <path d="M2 2h20l-6.5 8.5V20l-7 3V10.5L2 2z" fill="none" stroke="#ff3b30" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+    <!-- Slash / block line -->
+    <line x1="20" y1="3" x2="4" y2="21" stroke="#ff3b30" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
+  </g>
+</svg>

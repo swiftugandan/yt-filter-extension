@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { motion } from "motion/react";
 
 const DOWNLOAD_URL = "/yt-video-filter.zip";
@@ -156,46 +157,42 @@ const fadeUp = {
 };
 
 export default function LandingPage() {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
   return (
     <main>
       {/* ─── Hero ─── */}
       <div className="hero">
-        <motion.div
-          className="hero-badge"
-          initial={{ opacity: 0, y: -12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+        <div
+          className={`hero-badge fade-in ${mounted ? "visible" : ""}`}
+          style={{ animationDelay: "0s" }}
         >
           <span className="dot" />
           Chrome Extension v2.1
-        </motion.div>
+        </div>
 
-        <motion.h1
-          initial={{ opacity: 0, y: 32 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+        <h1
+          className={`fade-in ${mounted ? "visible" : ""}`}
+          style={{ animationDelay: "0.1s" }}
         >
           YT Video
           <br />
           <em>Filter</em>
-        </motion.h1>
+        </h1>
 
-        <motion.p
-          className="hero-sub"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.25, ease: [0.16, 1, 0.3, 1] }}
+        <p
+          className={`hero-sub fade-in ${mounted ? "visible" : ""}`}
+          style={{ animationDelay: "0.25s" }}
         >
           Take control of your YouTube feed. Filter out clickbait, shorts, ads,
           and toxic content with regex patterns and ML&#8209;powered
           classification.
-        </motion.p>
+        </p>
 
-        <motion.div
-          className="hero-actions"
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
+        <div
+          className={`hero-actions fade-in ${mounted ? "visible" : ""}`}
+          style={{ animationDelay: "0.4s" }}
         >
           <a className="btn-primary" href={DOWNLOAD_URL} download>
             <DownloadIcon />
@@ -205,7 +202,7 @@ export default function LandingPage() {
             Install Guide
             <ArrowIcon />
           </a>
-        </motion.div>
+        </div>
       </div>
 
       {/* ─── Features ─── */}
