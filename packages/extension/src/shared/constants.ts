@@ -13,15 +13,13 @@ export const SCAN_INTERVAL_MS = 3000;
 export const DASHBOARD_POLL_MS = 2000;
 
 export const VIDEO_CONTAINER_SELECTORS = [
-  "ytd-rich-item-renderer",
-  "ytd-video-renderer",
-  "ytd-compact-video-renderer",
-  "ytd-grid-video-renderer",
-  "ytd-reel-item-renderer",
-  "ytd-rich-grid-media",
-  "ytd-playlist-renderer",
-  "ytd-radio-renderer",
-  "ytd-compact-radio-renderer",
+  "ytd-rich-item-renderer", // Home page
+  "ytd-video-renderer", // Search results
+  "yt-lockup-view-model", // Watch page sidebar
+  "ytd-reel-item-renderer", // Shorts shelf
+  "ytd-playlist-renderer", // Playlist results
+  "ytd-radio-renderer", // Mix results
+  "ytd-compact-radio-renderer", // Compact mix results
 ].join(",");
 
 export {

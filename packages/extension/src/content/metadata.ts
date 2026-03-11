@@ -17,29 +17,17 @@ export function extractMeta(container: Element): VideoMetadata {
   // ── Title ──
   let title = "";
   const titleEl =
+    // New view-model (home, sidebar)
+    container.querySelector("h3 a.yt-lockup-metadata-view-model__title") ||
+    // Legacy (search results)
     container.querySelector("#video-title") ||
-    container.querySelector("yt-formatted-string#video-title") ||
-    container.querySelector("[id='video-title']") ||
-    container.querySelector("h3 a#video-title-link") ||
-    container.querySelector("span#video-title") ||
-    container.querySelector("#title-wrapper yt-formatted-string");
+    // Shorts
+    container.querySelector(
+      "[class*='shortsLockupViewModelHostOutsideMetadata'] span",
+    ) ||
+    container.querySelector("h3 span");
   if (titleEl) {
     title = (titleEl.textContent || titleEl.getAttribute("title") || "").trim();
-  }
-  if (!title) {
-    const reelTitle =
-      container.querySelector("#headline") ||
-      container.querySelector(
-        "h3.shortsLockupViewModelHostOutsideMetadataTitle span",
-      ) ||
-      container.querySelector("h3 span") ||
-      container.querySelector(
-        "[class*='shortsLockupViewModelHostOutsideMetadata'] span",
-      ) ||
-      container.querySelector(
-        "yt-formatted-string.shortsLockupViewModelHostMetadataTitle",
-      );
-    if (reelTitle) title = (reelTitle.textContent || "").trim();
   }
   if (!title) {
     const ariaEl =
@@ -56,25 +44,29 @@ export function extractMeta(container: Element): VideoMetadata {
 
   // ── Channel ──
   let channel = "";
-  const channelEl =
-    container.querySelector("ytd-channel-name yt-formatted-string a") ||
-    container.querySelector("ytd-channel-name yt-formatted-string") ||
-    container.querySelector("#channel-name yt-formatted-string a") ||
-    container.querySelector("#channel-name a") ||
-    container.querySelector(".ytd-channel-name a");
-  if (channelEl) {
-    channel = (channelEl.textContent || "").trim();
+  // New view-model: first yt-core-attributed-string in content metadata
+  const contentMeta = container.querySelector("yt-content-metadata-view-model");
+  if (contentMeta) {
+    const firstMeta = contentMeta.querySelector(
+      "span.yt-core-attributed-string",
+    );
+    if (firstMeta) channel = (firstMeta.textContent || "").trim();
   }
+  // Legacy (search results)
   if (!channel) {
-    const reelChannel =
-      container.querySelector(".ytd-reel-item-renderer #channel-name") ||
-      container.querySelector(
-        "[class*='shortsLockupViewModelHostOutsideMetadata'] .yt-core-attributed-string",
-      ) ||
-      container.querySelector(
-        "span.shortsLockupViewModelHostMetadataSubhead span",
-      ) ||
-      container.querySelector("#channel-name");
+    const channelEl =
+      container.querySelector("ytd-channel-name yt-formatted-string a") ||
+      container.querySelector("ytd-channel-name yt-formatted-string") ||
+      container.querySelector("#channel-name a");
+    if (channelEl) {
+      channel = (channelEl.textContent || "").trim();
+    }
+  }
+  // Shorts
+  if (!channel) {
+    const reelChannel = container.querySelector(
+      "[class*='shortsLockupViewModelHostOutsideMetadata'] .yt-core-attributed-string",
+    );
     if (reelChannel) channel = (reelChannel.textContent || "").trim();
   }
   if (!channel) {
@@ -87,14 +79,10 @@ export function extractMeta(container: Element): VideoMetadata {
   }
 
   // ── Duration ──
+  // badge-shape works on both new view-model and legacy renderers
   const durationEl =
-    container.querySelector(
-      "ytd-thumbnail-overlay-time-status-renderer span",
-    ) ||
-    container.querySelector(
-      "span.ytd-thumbnail-overlay-time-status-renderer",
-    ) ||
-    container.querySelector("#overlays span");
+    container.querySelector("badge-shape .yt-badge-shape__text") ||
+    container.querySelector("ytd-thumbnail-overlay-time-status-renderer span");
   const durationText = (durationEl?.textContent || "").trim();
   const duration = parseDuration(durationText);
 
@@ -103,21 +91,18 @@ export function extractMeta(container: Element): VideoMetadata {
     isReelItem ||
     durationText.toUpperCase() === "SHORTS" ||
     !!container.querySelector("a[href*='/shorts/']") ||
-    !!container.querySelector("[is-short]") ||
-    !!container.querySelector("ytd-reel-item-renderer") ||
     !!container.querySelector("[class*='shortsLockupViewModel']");
 
   const liveBadge =
+    container.querySelector("[overlay-style='LIVE']") ||
     container.querySelector(
       "ytd-badge-supported-renderer .badge-style-type-live-now",
-    ) ||
-    container.querySelector("[overlay-style='LIVE']") ||
-    container.querySelector(".badge-style-type-live-now-alternate");
+    );
   const isLive = !!liveBadge || durationText.toUpperCase() === "LIVE";
 
-  const isWatched = !!container.querySelector(
-    "ytd-thumbnail-overlay-resume-playback-renderer",
-  );
+  const isWatched =
+    !!container.querySelector("yt-thumbnail-overlay-progress-bar-view-model") ||
+    !!container.querySelector("ytd-thumbnail-overlay-resume-playback-renderer");
 
   const isMix =
     tag === "ytd-radio-renderer" ||
@@ -127,7 +112,7 @@ export function extractMeta(container: Element): VideoMetadata {
 
   // ── URL ──
   const linkEl =
-    container.querySelector("a#video-title-link") ||
+    container.querySelector("a.yt-lockup-metadata-view-model__title") ||
     container.querySelector("a#thumbnail") ||
     container.querySelector("a[href*='/watch']") ||
     container.querySelector("a[href*='/shorts/']") ||
@@ -142,21 +127,10 @@ export function extractMeta(container: Element): VideoMetadata {
     url.includes("/playables");
 
   // ── Ads ──
-  const adBadgeSpan = container.querySelector(
-    "span.ytd-badge-supported-renderer:not(:empty)",
-  );
   const isAd =
-    !!container.querySelector("[class*='badge-style-type-ad']") ||
     !!container.querySelector("ytd-ad-slot-renderer") ||
-    !!container.querySelector("[id='ad-badge']") ||
-    !!container.querySelector("[class*='ytd-promoted']") ||
-    (!!adBadgeSpan &&
-      (adBadgeSpan.textContent || "").trim().toLowerCase() === "ad") ||
-    !!container.closest("ytd-ad-slot-renderer") ||
-    !!container.querySelector("[aria-label='Ad']") ||
-    !!container.querySelector("[badge-style='BADGE_STYLE_TYPE_AD']") ||
-    url.includes("&ad_") ||
-    url.includes("/ad/");
+    !!container.querySelector("ytd-in-feed-ad-layout-renderer") ||
+    !!container.closest("ytd-ad-slot-renderer");
 
   return {
     title,
