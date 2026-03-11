@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+      :root {
+        --bg: #f5f5f7;
+        --surface: #fff;
+        --border: #e0e0e0;
+        --text: #333;
+        --text-hi: #111;
+        --text-dim: #888;
+        --accent: #e53935;
+        --accent2: #d32f2f;
+        --green: #43a047;
+        --green-dim: #e8f5e9;
+        --cyan: #0097a7;
+        --sans:
+          "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          sans-serif;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        width: 300px;
+        font-family: var(--sans);
+        font-size: 13px;
+        background: var(--bg);
+        color: var(--text);
+      }
+
+      .head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 14px;
+        border-bottom: 1px solid var(--border);
+      }
+      .head h1 {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text-hi);
+      }
+      .switch {
+        position: relative;
+        width: 36px;
+        height: 20px;
+        cursor: pointer;
+      }
+      .switch input {
+        display: none;
+      }
+      .switch .track {
+        position: absolute;
+        inset: 0;
+        background: #ccc;
+        border-radius: 10px;
+        transition: background 0.15s;
+      }
+      .switch .track::before {
+        content: "";
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        width: 16px;
+        height: 16px;
+        background: #fff;
+        border-radius: 50%;
+        transition:
+          transform 0.15s,
+          background 0.15s;
+      }
+      .switch input:checked + .track {
+        background: #a5d6a7;
+      }
+      .switch input:checked + .track::before {
+        transform: translateX(16px);
+        background: var(--green);
+      }
+
+      .stats {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0;
+        border-bottom: 1px solid var(--border);
+      }
+      .st {
+        padding: 12px 14px;
+        border-right: 1px solid var(--border);
+      }
+      .st:last-child {
+        border-right: none;
+      }
+      .st .v {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--text-hi);
+        font-variant-numeric: tabular-nums;
+      }
+      .st .l {
+        font-size: 10px;
+        color: var(--text-dim);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-top: 2px;
+      }
+      .st.red .v {
+        color: var(--accent);
+      }
+      .st.grn .v {
+        color: var(--green);
+      }
+
+      .rules {
+        padding: 10px 14px;
+        border-bottom: 1px solid var(--border);
+        font-size: 10px;
+        color: var(--text-dim);
+        max-height: 80px;
+        overflow-y: auto;
+      }
+      .rules .r {
+        padding: 1px 0;
+      }
+      .rules .r::before {
+        content: "· ";
+        color: #555;
+      }
+      .rules .rl {
+        color: var(--text-dim);
+      }
+      .rules .rv {
+        color: var(--text-hi);
+      }
+
+      .actions {
+        padding: 10px 14px;
+        display: flex;
+        gap: 8px;
+      }
+      .btn {
+        flex: 1;
+        font-family: var(--sans);
+        font-size: 12px;
+        font-weight: 500;
+        padding: 7px 0;
+        text-align: center;
+        border-radius: 6px;
+        border: 1px solid var(--border);
+        background: var(--surface);
+        color: var(--text);
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+      .btn:hover {
+        background: var(--bg);
+        border-color: #ccc;
+        color: var(--text-hi);
+      }
+      .btn-accent {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+      .btn-accent:hover {
+        background: var(--accent);
+        color: #fff;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="head">
+      <h1>YT Filter</h1>
+      <label class="switch">
+        <input type="checkbox" id="toggle" checked />
+        <div class="track"></div>
+      </label>
+    </div>
+
+    <div class="stats">
+      <div class="st red">
+        <div class="v" id="hidden">—</div>
+        <div class="l">Filtered</div>
+      </div>
+      <div class="st grn">
+        <div class="v" id="visible">—</div>
+        <div class="l">Showing</div>
+      </div>
+    </div>
+
+    <div class="rules" id="rules"></div>
+
+    <div class="actions">
+      <button class="btn btn-accent" id="openPanel">Settings</button>
+    </div>
+
+    <script src="popup.js"></script>
+  </body>
+</html>
