@@ -340,7 +340,11 @@ export default function LandingPage() {
       {/* ─── Footer ─── */}
       <footer className="footer">
         YT Video Filter &middot; Open source &middot;{" "}
-        <a href="https://github.com" target="_blank" rel="noopener noreferrer">
+        <a
+          href="https://github.com/swiftugandan/yt-filter-extension"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
           GitHub
         </a>
       </footer>
