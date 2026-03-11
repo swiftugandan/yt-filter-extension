@@ -16,7 +16,7 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "package": "pnpm build:ext && cd packages/extension/dist && zip -r ../../../yt-video-filter.zip . -x '*.DS_Store'",
+    "package": "pnpm build:ext && mkdir -p packages/landing/public && cd packages/extension/dist && zip -r ../../../packages/landing/public/yt-video-filter.zip . -x '*.DS_Store'",
     "prepare": "husky"
   },
   "lint-staged": {
