@@ -7,10 +7,16 @@ export default tseslint.config(
   ...tseslint.configs.recommended,
   prettier,
   {
-    ignores: ["dist/", "vendor/", "node_modules/"],
+    ignores: [
+      "**/dist/",
+      "**/vendor/",
+      "**/node_modules/",
+      "**/.next/",
+      "**/next-env.d.ts",
+    ],
   },
   {
-    files: ["scripts/**/*.mjs"],
+    files: ["**/scripts/**/*.mjs"],
     languageOptions: {
       globals: { console: "readonly" },
     },

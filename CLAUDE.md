@@ -4,33 +4,81 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Chrome extension (Manifest V3) that filters YouTube videos from the DOM based on configurable rules. Supports regex matching, content-type filters (shorts, live, ads, mixes, playables), built-in clickbait/toxic pattern detection, and optional ML-based classification using transformer embeddings.
+pnpm monorepo containing a Chrome extension (Manifest V3) that filters YouTube videos from the DOM, plus a Next.js server for LLM-based classification. Supports regex matching, content-type filters (shorts, live, ads, mixes, playables), built-in clickbait/toxic pattern detection, optional in-browser ML classification (transformers.js), and optional server-side LLM classification.
 
 ## Development
 
-TypeScript codebase with tsup bundler. Key commands:
+TypeScript codebase. Key commands:
 
-- `npm run build` — Build to `dist/` (tsup + copy static/vendor files)
-- `npm run typecheck` — Type-check with `tsc --noEmit` (strict mode)
-- `npm test` — Run tests with vitest (jsdom environment)
-- `npm run dev` — Watch mode for development
+- `pnpm install` — Install all dependencies
+- `pnpm build` — Build all packages
+- `pnpm build:ext` — Build extension to `packages/extension/dist/`
+- `pnpm build:server` — Build Next.js server
+- `pnpm typecheck` — Type-check all packages (strict mode)
+- `pnpm test` — Run extension tests with vitest (jsdom environment)
+- `pnpm dev` — Watch mode for extension development
+- `pnpm dev:server` — Start Next.js dev server on :3000
 
-To test changes, run `npm run build` then load `dist/` as an unpacked extension at `chrome://extensions/`.
+To test extension changes, run `pnpm build:ext` then load `packages/extension/dist/` as an unpacked extension at `chrome://extensions/`.
+
+## Monorepo Structure
+
+```
+yt-filter-extension/
+├── pnpm-workspace.yaml
+├── package.json              # Root: workspace scripts, shared devDeps
+├── tsconfig.base.json        # Shared TS compiler options
+├── eslint.config.js
+├── packages/
+│   ├── shared/               # @ytf/shared — types & constants used by both
+│   │   └── src/
+│   │       ├── types/        # config.ts, video.ts, messages.ts, api.ts
+│   │       ├── constants.ts  # Storage keys
+│   │       └── categories.ts # Archetype phrases (shared between local ML + server prompt)
+│   ├── extension/            # @ytf/extension — Chrome extension
+│   │   ├── src/              # content/, background/, popup/, options/, offscreen/, ml-worker/, shared/, types/
+│   │   ├── static/           # manifest.json, HTML, icons
+│   │   ├── vendor/           # transformers.min.js, ort.* (kept for local ML)
+│   │   ├── test/
+│   │   └── tsup.config.ts    # 6 bundles (IIFE + ESM for ml-worker)
+│   └── server/               # @ytf/server — Next.js classification API
+│       └── src/
+│           ├── app/api/classify/route.ts
+│           └── lib/          # llm-client.ts, prompt.ts, cache.ts, schema.ts
+```
 
 ## Architecture
 
+### Classifier Backends
+
+Users choose in settings: Off / Local (in-browser ML) / Server (LLM API).
+
+- **Off**: Only regex/keyword/content-type filters active
+- **Local**: In-browser ML via offscreen doc → Web Worker → transformers.js
+- **Server**: Background service worker POSTs to Next.js `/api/classify`
+
+The content script is backend-agnostic — it sends `ML_CLASSIFY` messages to the background, which routes to the appropriate backend. Results come back as `ML_RESULTS` in the same format regardless of backend.
+
 ### Message Flow
 
-Content script ↔ Background service worker ↔ Offscreen document ↔ Web Worker
+Content script ↔ Background service worker ↔ Offscreen document ↔ Web Worker (local)
+Content script ↔ Background service worker ↔ Next.js server (server)
 
-- **src/content/**: Injected into YouTube pages. MutationObserver + periodic scan finds video containers, extracts metadata, applies filter rules, hides/blurs matched elements. Batched log entries (1s flush). ML mode queues titles for classification.
-- **src/background/**: Service worker managing config defaults (`chrome.storage.sync`), badge state, filter log relay (`chrome.storage.local`, 500 entry cap), offscreen document lifecycle.
-- **src/offscreen/**: Offscreen document spawning `ml-worker.js` as a module Worker, relaying messages between worker and background.
-- **src/ml-worker/**: Runs `Xenova/all-MiniLM-L6-v2` via transformers.js. Embeds archetype phrases at startup, classifies titles by cosine similarity with per-category threshold + margin. IndexedDB cache (5000 entries).
-- **src/popup/**: Toolbar popup — master toggle, live stats, active rule summary.
-- **src/options/**: Full control panel with tabs: dashboard, filters config, filter log, presets, import/export.
+### Extension Packages
 
-### Build Output (6 bundles)
+- **packages/shared/**: Shared types (`YTFilterConfig`, `ClassifyRequest/Response`, `MLClassifyResult`), archetype phrases, storage key constants. Raw TS consumed via workspace protocol (no build step).
+- **packages/extension/src/content/**: Injected into YouTube pages. MutationObserver + periodic scan finds video containers, extracts metadata, applies filter rules, hides/blurs matched elements.
+- **packages/extension/src/background/**: Service worker managing config, badge state, filter log, offscreen lifecycle, and classifier backend routing (`server-classify.ts`).
+- **packages/extension/src/offscreen/**: Offscreen document spawning `ml-worker.js` as a module Worker.
+- **packages/extension/src/ml-worker/**: Runs `Xenova/all-MiniLM-L6-v2` via transformers.js. Imports archetypes from `@ytf/shared`.
+- **packages/extension/src/popup/**: Toolbar popup — master toggle, live stats, active rule summary.
+- **packages/extension/src/options/**: Full control panel with classifier backend selector (Off/Local/Server), server URL config, test connection button.
+
+### Server Package
+
+- **packages/server/**: Next.js app with `/api/classify` route. Uses OpenAI SDK (compatible with Groq, OpenAI, etc). Zod validation for requests and LLM output. In-memory LRU cache (5000 entries). CORS for chrome-extension origins.
+
+### Build Output (6 extension bundles)
 
 | Entry                     | Format | Output                 |
 | ------------------------- | ------ | ---------------------- |
@@ -41,51 +89,28 @@ Content script ↔ Background service worker ↔ Offscreen document ↔ Web Work
 | `src/offscreen/index.ts`  | IIFE   | `dist/ml-offscreen.js` |
 | `src/ml-worker/index.ts`  | ESM    | `dist/ml-worker.js`    |
 
-ML worker must be ESM (module Worker). `transformers.min.js` is marked external so the import is preserved at runtime.
+`@ytf/shared` is inlined via `noExternal` in tsup config. ML worker must be ESM (module Worker). `transformers.min.js` is marked external.
 
-### DOM Targeting Strategy
+### Config
 
-YouTube is a Web Components SPA — the extension targets stable custom element tag names (e.g., `ytd-rich-item-renderer`, `ytd-video-renderer`) rather than class names. Three detection layers: MutationObserver, `yt-navigate-finish` event, and a 3-second periodic scan.
+- `classifierBackend`: `"off" | "local" | "server"` (replaces old `mlEnabled` boolean)
+- `serverUrl`: string (default `"http://localhost:3000"`)
 
 ### Storage
 
-- **Config**: `chrome.storage.sync` (key: `ytFilterConfig`) — syncs across Chrome profile
-- **Log**: `chrome.storage.local` (key: `ytFilterLog`) — device-local, 500 entry cap
+- **Config**: `chrome.storage.sync` (key: `ytFilterConfig`)
+- **Log**: `chrome.storage.local` (key: `ytFilterLog`) — 500 entry cap
 - **User presets**: `chrome.storage.local` (key: `ytFilterPresets`)
 - **ML cache**: IndexedDB (`ytf-ml-cache`) — 5000 entry cap with LRU eviction
 
-### Filter Modes
-
-- `hide`: `display: none !important` via data attribute
-- `blur`: Blurred overlay with hover-to-peek and reason text
-
-### Adding New Filters
-
-Built-in pattern detection uses regex arrays in `src/content/filters.ts` (clickbait, toxic, fear, scam, dark pattern categories). ML archetypes are in `src/ml-worker/archetypes.ts` — adding new archetype strings requires no retraining.
-
-## Directory Structure
-
-```
-src/
-├── types/          # TypeScript interfaces (config, video, messages, chrome augmentations)
-├── shared/         # Constants, typed storage wrappers, escapeHtml
-├── content/        # Content script (metadata, filters, scanner, ml-client, ui, logging)
-├── background/     # Service worker (offscreen, badge, log-store)
-├── popup/          # Popup logic
-├── options/        # Options page (config-ui, dashboard, log-panel, presets, import-export)
-├── offscreen/      # Offscreen document (worker relay)
-└── ml-worker/      # ML classifier (archetypes, classifier, idb-cache, pipeline)
-static/             # manifest.json, HTML files, icons → copied to dist/
-vendor/             # transformers.min.js, ort.* files → copied to dist/ (do not edit)
-test/               # Vitest tests
-```
-
 ## Key Files
 
-- `static/manifest.json` — MV3 manifest, permissions: storage, activeTab, tabs, offscreen
-- `src/content/filters.ts` — Regex pattern constants and matchReasons()
-- `src/content/metadata.ts` — YouTube DOM metadata extraction
-- `src/background/index.ts` — Service worker message router
-- `src/ml-worker/classifier.ts` — Embedding-based classifier
-- `src/types/config.ts` — YTFilterConfig interface and DEFAULT_CONFIG
-- `vendor/transformers.min.js`, `vendor/ort.*` — Bundled ML runtime (do not edit)
+- `packages/shared/src/types/config.ts` — YTFilterConfig interface with classifierBackend
+- `packages/shared/src/categories.ts` — Archetype phrases (used by local ML + server prompt)
+- `packages/extension/src/background/index.ts` — Service worker message router with backend routing
+- `packages/extension/src/background/server-classify.ts` — Server backend fetch + mapping
+- `packages/extension/src/content/filters.ts` — Regex pattern constants and matchReasons()
+- `packages/extension/src/options/config-ui.ts` — Options page with classifier backend selector
+- `packages/extension/static/manifest.json` — MV3 manifest
+- `packages/server/src/app/api/classify/route.ts` — LLM classification endpoint
+- `packages/server/src/lib/prompt.ts` — System prompt with category definitions

@@ -1,0 +1,1410 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>YT Video Filter — Settings</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+
+      :root {
+        --bg: #f5f5f7;
+        --surface: #ffffff;
+        --surface2: #fafafa;
+        --border: #e0e0e0;
+        --border-hi: #ccc;
+        --text: #333;
+        --text-hi: #111;
+        --text-dim: #888;
+        --accent: #e53935;
+        --accent2: #d32f2f;
+        --green: #43a047;
+        --green-dim: #e8f5e9;
+        --yellow: #f57f17;
+        --cyan: #0097a7;
+        --blue: #1e88e5;
+        --tag-bg: #f0f0f0;
+        --sans:
+          "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Helvetica, Arial, sans-serif;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        font-family: var(--sans);
+        font-size: 14px;
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.5;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      /* ── Layout ──────────────────────────────────────────────────────── */
+      .shell {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 24px 32px;
+      }
+
+      .header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding-bottom: 16px;
+        border-bottom: 1px solid var(--border);
+        margin-bottom: 24px;
+      }
+      .header-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .header h1 {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--text-hi);
+        letter-spacing: -0.3px;
+      }
+      .header .version {
+        font-size: 10px;
+        color: var(--text-dim);
+        border: 1px solid var(--border);
+        padding: 1px 6px;
+        border-radius: 3px;
+      }
+      .header-right {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+
+      /* ── Master toggle ───────────────────────────────────────────────── */
+      .master-toggle {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        user-select: none;
+      }
+      .master-toggle .status {
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+      .master-toggle .status.on {
+        color: var(--green);
+      }
+      .master-toggle .status.off {
+        color: var(--text-dim);
+      }
+      .switch {
+        position: relative;
+        width: 36px;
+        height: 20px;
+      }
+      .switch input {
+        display: none;
+      }
+      .switch .track {
+        position: absolute;
+        inset: 0;
+        background: #ccc;
+        border-radius: 10px;
+        transition: background 0.15s;
+      }
+      .switch .track::before {
+        content: "";
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        width: 16px;
+        height: 16px;
+        background: #fff;
+        border-radius: 50%;
+        transition:
+          transform 0.15s,
+          background 0.15s;
+      }
+      .switch input:checked + .track {
+        background: #a5d6a7;
+      }
+      .switch input:checked + .track::before {
+        transform: translateX(16px);
+        background: var(--green);
+      }
+
+      /* ── Tab nav ─────────────────────────────────────────────────────── */
+      .tabs {
+        display: flex;
+        gap: 0;
+        border-bottom: 1px solid var(--border);
+        margin-bottom: 24px;
+      }
+      .tab {
+        padding: 8px 20px;
+        font-family: var(--sans);
+        font-size: 12px;
+        font-weight: 500;
+        color: var(--text-dim);
+        background: none;
+        border: none;
+        border-bottom: 2px solid transparent;
+        cursor: pointer;
+        transition:
+          color 0.15s,
+          border-color 0.15s;
+        letter-spacing: 0.5px;
+      }
+      .tab:hover {
+        color: var(--text);
+      }
+      .tab.active {
+        color: var(--accent);
+        border-bottom-color: var(--accent);
+      }
+
+      .panel {
+        display: none;
+      }
+      .panel.active {
+        display: block;
+      }
+
+      /* ── Section blocks ──────────────────────────────────────────────── */
+      .section {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        margin-bottom: 16px;
+        overflow: hidden;
+      }
+      .section-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 16px;
+        border-bottom: 1px solid var(--border);
+        background: var(--surface2);
+      }
+      .section-head h3 {
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--text-dim);
+      }
+      .section-head h3::before {
+        content: "";
+      }
+      .section-body {
+        padding: 14px 16px;
+      }
+
+      /* ── Inputs ──────────────────────────────────────────────────────── */
+      .field {
+        margin-bottom: 14px;
+      }
+      .field:last-child {
+        margin-bottom: 0;
+      }
+      .field-label {
+        font-size: 11px;
+        color: var(--text-dim);
+        margin-bottom: 4px;
+        display: block;
+      }
+      .field-label .hint {
+        color: #999;
+        font-weight: 400;
+      }
+
+      input[type="text"],
+      input[type="number"] {
+        width: 100%;
+        padding: 8px 12px;
+        font-family: var(--sans);
+        font-size: 13px;
+        background: #fff;
+        color: var(--text-hi);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        outline: none;
+        transition: border-color 0.15s;
+      }
+      input[type="text"]:focus,
+      input[type="number"]:focus {
+        border-color: var(--accent);
+      }
+      input[type="number"] {
+        width: 120px;
+      }
+
+      /* ── Tag inputs ──────────────────────────────────────────────────── */
+      .tag-area {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        padding: 8px 10px;
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        min-height: 40px;
+        align-items: center;
+        cursor: text;
+        transition: border-color 0.15s;
+      }
+      .tag-area:focus-within {
+        border-color: var(--accent);
+      }
+      .tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 3px 10px;
+        background: var(--tag-bg);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        font-size: 12px;
+        color: var(--text-hi);
+        font-family: var(--sans);
+      }
+      .tag .x {
+        cursor: pointer;
+        color: var(--text-dim);
+        font-size: 13px;
+        line-height: 1;
+        margin-left: 2px;
+      }
+      .tag .x:hover {
+        color: var(--accent);
+      }
+      .tag-input {
+        border: none;
+        outline: none;
+        background: transparent;
+        color: var(--text-hi);
+        font-family: var(--sans);
+        font-size: 12px;
+        flex: 1;
+        min-width: 100px;
+      }
+      .tag-input::placeholder {
+        color: #aaa;
+      }
+
+      /* ── Toggle rows ─────────────────────────────────────────────────── */
+      .toggle-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 6px 0;
+      }
+      .toggle-row + .toggle-row {
+        border-top: 1px solid var(--border);
+        margin-top: 6px;
+        padding-top: 10px;
+      }
+      .toggle-row label {
+        font-size: 12px;
+        color: var(--text);
+      }
+      .hint-inline {
+        font-size: 11px;
+        color: #999;
+        font-weight: 400;
+        display: block;
+        margin-top: 1px;
+      }
+
+      /* ── Duration row ────────────────────────────────────────────────── */
+      .dur-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .dur-row span {
+        font-size: 11px;
+        color: var(--text-dim);
+      }
+
+      /* ── Buttons ─────────────────────────────────────────────────────── */
+      .btn {
+        font-family: var(--sans);
+        font-size: 13px;
+        font-weight: 500;
+        padding: 7px 16px;
+        border-radius: 6px;
+        border: 1px solid var(--border);
+        background: var(--surface);
+        color: var(--text);
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+      .btn:hover {
+        background: var(--surface2);
+        border-color: var(--border-hi);
+        color: var(--text-hi);
+      }
+      .btn-accent {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+      .btn-accent:hover {
+        background: var(--accent);
+        color: #fff;
+      }
+      .btn-green {
+        border-color: var(--green);
+        color: var(--green);
+      }
+      .btn-green:hover {
+        background: var(--green);
+        color: #fff;
+      }
+      .btn-row {
+        display: flex;
+        gap: 8px;
+        margin-top: 12px;
+      }
+
+      /* ── Dashboard ───────────────────────────────────────────────────── */
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+        margin-bottom: 20px;
+      }
+      .stat-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 14px 16px;
+      }
+      .stat-card .val {
+        font-size: 28px;
+        font-weight: 700;
+        color: var(--text-hi);
+        line-height: 1;
+        margin-bottom: 4px;
+        font-variant-numeric: tabular-nums;
+      }
+      .stat-card .label {
+        font-size: 10px;
+        color: var(--text-dim);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+      .stat-card.accent .val {
+        color: var(--accent);
+      }
+      .stat-card.green .val {
+        color: var(--green);
+      }
+      .stat-card.cyan .val {
+        color: var(--cyan);
+      }
+
+      .live-indicator {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 11px;
+        color: var(--green);
+        margin-bottom: 16px;
+      }
+      .live-dot {
+        width: 8px;
+        height: 8px;
+        background: var(--green);
+        border-radius: 50%;
+        animation: pulse 1.5s infinite;
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.3;
+        }
+      }
+
+      /* ── Log table ───────────────────────────────────────────────────── */
+      .log-controls {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 12px;
+      }
+      .log-count {
+        font-size: 11px;
+        color: var(--text-dim);
+      }
+
+      .log-table-wrap {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        overflow: hidden;
+        max-height: 500px;
+        overflow-y: auto;
+      }
+      .log-table-wrap::-webkit-scrollbar {
+        width: 6px;
+      }
+      .log-table-wrap::-webkit-scrollbar-track {
+        background: var(--surface);
+      }
+      .log-table-wrap::-webkit-scrollbar-thumb {
+        background: #ccc;
+        border-radius: 3px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 11px;
+      }
+      thead {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+      }
+      th {
+        text-align: left;
+        padding: 8px 12px;
+        background: var(--surface2);
+        border-bottom: 1px solid var(--border);
+        font-size: 10px;
+        font-weight: 600;
+        color: var(--text-dim);
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+      }
+      td {
+        padding: 6px 12px;
+        border-bottom: 1px solid #eee;
+        color: var(--text);
+        max-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        vertical-align: top;
+      }
+      tr:hover td {
+        background: var(--surface2);
+      }
+      td.title-col {
+        width: 35%;
+        color: var(--text-hi);
+      }
+      td.channel-col {
+        width: 18%;
+        color: var(--cyan);
+      }
+      td.reason-col {
+        width: 27%;
+      }
+      td.time-col {
+        width: 12%;
+        color: var(--text-dim);
+        font-variant-numeric: tabular-nums;
+      }
+      td.dur-col {
+        width: 8%;
+        color: var(--text-dim);
+        text-align: right;
+      }
+
+      .reason-tag {
+        display: inline-block;
+        padding: 1px 6px;
+        background: #fce4ec;
+        border: 1px solid #f8bbd0;
+        border-radius: 10px;
+        color: var(--accent);
+        font-size: 11px;
+        margin-right: 3px;
+        margin-bottom: 2px;
+      }
+
+      .log-empty {
+        padding: 40px;
+        text-align: center;
+        color: var(--text-dim);
+        font-size: 12px;
+      }
+      .log-empty::before {
+        content: "";
+      }
+
+      /* ── Import/Export ───────────────────────────────────────────────── */
+      .io-section {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+      .io-box {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 16px;
+      }
+      .io-box h4 {
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--text-dim);
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        margin-bottom: 10px;
+      }
+      .io-box h4::before {
+        content: "";
+      }
+      textarea {
+        width: 100%;
+        height: 180px;
+        padding: 10px;
+        font-family: "SF Mono", "Fira Code", monospace;
+        font-size: 12px;
+        background: #fff;
+        color: var(--text-hi);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        resize: vertical;
+        outline: none;
+        transition: border-color 0.15s;
+      }
+      textarea:focus {
+        border-color: var(--accent);
+      }
+
+      .toast {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        padding: 10px 18px;
+        background: #fff;
+        border: 1px solid var(--green);
+        border-radius: 8px;
+        color: var(--green);
+        font-family: var(--sans);
+        font-size: 13px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        opacity: 0;
+        transform: translateY(10px);
+        transition: all 0.25s;
+        pointer-events: none;
+        z-index: 999;
+      }
+      .toast.show {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      .toast.error {
+        border-color: var(--accent);
+        color: var(--accent2);
+      }
+
+      /* ── Filter rule summary (dashboard) ─────────────────────────────── */
+      .rules-list {
+        list-style: none;
+        font-size: 11px;
+      }
+      .rules-list li {
+        padding: 4px 0;
+        color: var(--text);
+      }
+      .rules-list li::before {
+        content: "· ";
+        color: var(--text-dim);
+      }
+      .rules-list li .rl {
+        color: var(--yellow);
+      }
+      .rules-list li .rv {
+        color: var(--cyan);
+      }
+      .no-rules {
+        font-size: 11px;
+        color: var(--text-dim);
+        padding: 8px 0;
+      }
+      .no-rules::before {
+        content: "";
+      }
+
+      /* ── Presets ──────────────────────────────────────────────────────── */
+      .preset-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 12px;
+      }
+      .preset-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 14px 16px;
+        transition: border-color 0.15s;
+        position: relative;
+      }
+      .preset-card:hover {
+        border-color: var(--border-hi);
+      }
+      .preset-card .pc-name {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text-hi);
+        margin-bottom: 4px;
+      }
+      .preset-card .pc-name::before {
+        content: "";
+      }
+      .preset-card.user .pc-name::before {
+        content: "";
+      }
+      .preset-card .pc-desc {
+        font-size: 11px;
+        color: var(--text-dim);
+        margin-bottom: 10px;
+        line-height: 1.4;
+      }
+      .preset-card .pc-rules {
+        font-size: 11px;
+        color: var(--text);
+        margin-bottom: 12px;
+        padding: 8px 10px;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        max-height: 80px;
+        overflow-y: auto;
+      }
+      .preset-card .pc-rules::-webkit-scrollbar {
+        width: 4px;
+      }
+      .preset-card .pc-rules::-webkit-scrollbar-thumb {
+        background: var(--border-hi);
+        border-radius: 2px;
+      }
+      .preset-card .pc-rule {
+        padding: 1px 0;
+      }
+      .preset-card .pc-rule::before {
+        content: "· ";
+        color: var(--text-dim);
+      }
+      .preset-card .pc-rule:last-child::before {
+        content: "· ";
+        color: var(--text-dim);
+      }
+      .preset-card .pc-rule .rl {
+        color: var(--yellow);
+        font-size: 10px;
+      }
+      .preset-card .pc-rule .rv {
+        color: var(--cyan);
+        font-size: 10px;
+      }
+      .preset-card .pc-actions {
+        display: flex;
+        gap: 6px;
+      }
+      .btn-sm {
+        font-size: 10px;
+        padding: 4px 10px;
+      }
+      .preset-card .pc-ts {
+        font-size: 9px;
+        color: #333;
+        position: absolute;
+        top: 14px;
+        right: 16px;
+      }
+      .preset-card.pc-active {
+        border-color: var(--green);
+        background: #f1f8e9;
+      }
+      .pc-badge {
+        display: inline-block;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        padding: 1px 6px;
+        border-radius: 2px;
+        vertical-align: middle;
+        margin-left: 6px;
+      }
+      .pc-badge.active {
+        background: #e8f5e9;
+        color: var(--green);
+        border: 1px solid #a5d6a7;
+      }
+      .pc-badge.inactive {
+        background: transparent;
+        color: #bbb;
+        border: 1px solid #ddd;
+      }
+
+      /* ── Onboarding picks ────────────────────────────────────────────── */
+      .onb-pick {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        padding: 14px 16px;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        cursor: pointer;
+        text-align: left;
+        font-family: var(--sans);
+        transition:
+          border-color 0.15s,
+          background 0.15s;
+      }
+      .onb-pick:hover {
+        border-color: var(--green);
+        background: #e8f5e9;
+      }
+      .onb-pick strong {
+        font-size: 13px;
+        color: var(--text-hi);
+      }
+      .onb-pick span {
+        font-size: 11px;
+        color: var(--text-dim);
+        line-height: 1.4;
+      }
+
+      /* ── Advanced toggle ──────────────────────────────────────────────── */
+      .advanced-toggle {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 16px;
+        margin-bottom: 16px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        cursor: pointer;
+        user-select: none;
+        font-size: 12px;
+        color: var(--text-dim);
+        transition:
+          color 0.15s,
+          border-color 0.15s;
+      }
+      .advanced-toggle:hover {
+        color: var(--text);
+        border-color: var(--border-hi);
+      }
+      .advanced-toggle .arrow {
+        font-size: 10px;
+        transition: transform 0.2s;
+      }
+      .advanced-toggle.open .arrow {
+        transform: rotate(90deg);
+      }
+      .advanced-sections {
+        display: none;
+      }
+      .advanced-sections.open {
+        display: block;
+      }
+
+      /* ── Segmented control ─────────────────────────────────────────────── */
+      .ml-status-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 10px;
+        padding: 8px 10px;
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        font-size: 12px;
+      }
+      .ml-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--text-dim);
+        flex-shrink: 0;
+      }
+      .ml-dot.loading {
+        background: var(--yellow);
+        animation: pulse 1.5s infinite;
+      }
+      .ml-dot.ready {
+        background: var(--green);
+      }
+      .ml-dot.error {
+        background: var(--accent);
+      }
+      .ml-label {
+        color: var(--text-dim);
+      }
+      .seg-control {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+      .seg-btn {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        padding: 14px 12px;
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.15s;
+        font-family: var(--sans);
+      }
+      .seg-btn:hover {
+        border-color: var(--border-hi);
+      }
+      .seg-btn.active {
+        border-color: var(--accent);
+        background: #fce4ec;
+      }
+      .seg-btn .seg-icon {
+        font-size: 20px;
+        color: var(--text-dim);
+        line-height: 1;
+      }
+      .seg-btn.active .seg-icon {
+        color: var(--accent);
+      }
+      .seg-btn .seg-label {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text);
+        letter-spacing: -0.2px;
+      }
+      .seg-btn.active .seg-label {
+        color: var(--text-hi);
+      }
+      .seg-btn .seg-desc {
+        font-size: 10px;
+        color: var(--text-dim);
+      }
+
+      /* ── Save preset modal ───────────────────────────────────────────── */
+      .modal-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.3);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+      }
+      .modal-overlay.show {
+        display: flex;
+      }
+      .modal {
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 24px;
+        width: 400px;
+        max-width: 90vw;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+      }
+      .modal h3 {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text-hi);
+        margin-bottom: 16px;
+      }
+      .modal h3::before {
+        content: "";
+      }
+      .modal .field {
+        margin-bottom: 12px;
+      }
+      .modal .btn-row {
+        margin-top: 16px;
+        display: flex;
+        gap: 8px;
+        justify-content: flex-end;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <!-- Header -->
+      <div class="header">
+        <div class="header-left">
+          <h1>YT Video Filter</h1>
+          <span class="version">v2.0.0</span>
+        </div>
+        <div class="header-right">
+          <div class="master-toggle" id="masterToggle">
+            <span class="status on" id="statusText">ACTIVE</span>
+            <label class="switch">
+              <input type="checkbox" id="enableToggle" checked />
+              <div class="track"></div>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="tabs">
+        <button class="tab" data-tab="dashboard">Overview</button>
+        <button class="tab" data-tab="filters">Filters</button>
+        <button class="tab" data-tab="log">Activity Log</button>
+        <button class="tab active" data-tab="presets">Presets</button>
+        <button class="tab" data-tab="io">Import / Export</button>
+      </div>
+
+      <!-- ═══ DASHBOARD ═══ -->
+      <div class="panel" id="panel-dashboard">
+        <div class="live-indicator">
+          <span class="live-dot"></span>
+          <span id="liveStatus">polling youtube tab...</span>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card accent">
+            <div class="val" id="statHidden">0</div>
+            <div class="label">Filtered right now</div>
+          </div>
+          <div class="stat-card">
+            <div class="val" id="statTotal">0</div>
+            <div class="label">Videos on page</div>
+          </div>
+          <div class="stat-card green">
+            <div class="val" id="statVisible">0</div>
+            <div class="label">Showing</div>
+          </div>
+          <div class="stat-card cyan">
+            <div class="val" id="statAllTime">0</div>
+            <div class="label">Total filtered</div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-head"><h3>Active filters</h3></div>
+          <div class="section-body">
+            <ul class="rules-list" id="rulesSummary"></ul>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-head"><h3>Recently filtered</h3></div>
+          <div class="section-body" id="recentHitsBody">
+            <div class="log-empty">no recent activity</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ FILTERS ═══ -->
+      <div class="panel" id="panel-filters">
+        <div class="section">
+          <div class="section-head"><h3>When a video matches</h3></div>
+          <div class="section-body">
+            <div class="field">
+              <label class="field-label"
+                >Choose what happens to filtered videos</label
+              >
+              <div class="seg-control" id="filterModeControl">
+                <button class="seg-btn active" data-mode="hide">
+                  <span class="seg-icon">▬</span>
+                  <span class="seg-label">Hide</span>
+                  <span class="seg-desc">Remove from the page completely</span>
+                </button>
+                <button class="seg-btn" data-mode="blur">
+                  <span class="seg-icon">◐</span>
+                  <span class="seg-label">Blur</span>
+                  <span class="seg-desc">Blur the video, hover to peek</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-head"><h3>Block by words in title</h3></div>
+          <div class="section-body">
+            <div class="field">
+              <label class="field-label"
+                >Hide videos whose title contains any of these words</label
+              >
+              <div class="tag-area" id="kwWrap">
+                <input
+                  class="tag-input"
+                  id="kwInput"
+                  placeholder="Type a word and press Enter"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-head"><h3>Block channels</h3></div>
+          <div class="section-body">
+            <div class="field">
+              <label class="field-label"
+                >Hide all videos from these channels</label
+              >
+              <div class="tag-area" id="chWrap">
+                <input
+                  class="tag-input"
+                  id="chInput"
+                  placeholder="Type a channel name and press Enter"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="advanced-toggle" id="advancedToggle">
+          <span class="arrow">&#9654;</span>
+          <span>Show advanced options</span>
+        </div>
+
+        <div class="advanced-sections" id="advancedSections">
+          <div class="section">
+            <div class="section-head"><h3>Smart Detection (AI)</h3></div>
+            <div class="section-body">
+              <div class="field">
+                <label class="field-label"
+                  >Classification backend
+                  <span class="hint-inline"
+                    >Uses AI to catch clickbait, toxicity, scams, and
+                    manipulation that simple keyword filters miss.</span
+                  >
+                </label>
+                <select
+                  id="classifierBackend"
+                  style="
+                    width: 100%;
+                    padding: 8px 12px;
+                    font-family: var(--sans);
+                    font-size: 13px;
+                    background: #fff;
+                    color: var(--text-hi);
+                    border: 1px solid var(--border);
+                    border-radius: 6px;
+                    outline: none;
+                  "
+                >
+                  <option value="off">Off</option>
+                  <option value="local">
+                    Local (in-browser ML, ~23 MB download)
+                  </option>
+                  <option value="server">Server (LLM API)</option>
+                </select>
+              </div>
+              <div id="serverFields" style="display: none; margin-top: 12px">
+                <div class="field">
+                  <label class="field-label">Server URL</label>
+                  <input
+                    type="text"
+                    id="serverUrl"
+                    placeholder="http://localhost:3000"
+                  />
+                </div>
+                <div style="margin-top: 8px">
+                  <button class="btn btn-sm" id="testServerBtn">
+                    Test Connection
+                  </button>
+                </div>
+              </div>
+              <div id="mlStatusRow" class="ml-status-row" style="display: none">
+                <span class="ml-dot" id="mlDot"></span>
+                <span class="ml-label" id="mlLabel">idle</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-head"><h3>Custom pattern (regex)</h3></div>
+            <div class="section-body">
+              <div class="field">
+                <label class="field-label"
+                  >Match titles using a regular expression
+                  <span class="hint">(leave blank to disable)</span></label
+                >
+                <input
+                  type="text"
+                  id="regexInput"
+                  placeholder="e.g. #sponsored|collab"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-head"><h3>Video length</h3></div>
+            <div class="section-body">
+              <div class="dur-row">
+                <span>At least (seconds)</span>
+                <input type="number" id="minDur" min="0" placeholder="—" />
+                <span>At most (seconds)</span>
+                <input type="number" id="maxDur" min="0" placeholder="—" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-head"><h3>Content types to filter</h3></div>
+          <div class="section-body">
+            <div class="toggle-row">
+              <label>YouTube Shorts</label>
+              <label class="switch"
+                ><input type="checkbox" id="hideShorts" />
+                <div class="track"></div
+              ></label>
+            </div>
+            <div class="toggle-row">
+              <label>Live streams</label>
+              <label class="switch"
+                ><input type="checkbox" id="hideLive" />
+                <div class="track"></div
+              ></label>
+            </div>
+            <div class="toggle-row">
+              <label>Already watched videos</label>
+              <label class="switch"
+                ><input type="checkbox" id="hideWatched" />
+                <div class="track"></div
+              ></label>
+            </div>
+            <div class="toggle-row">
+              <label>Mixes and playlist cards</label>
+              <label class="switch"
+                ><input type="checkbox" id="hideMixes" />
+                <div class="track"></div
+              ></label>
+            </div>
+            <div class="toggle-row">
+              <label>Playables (mini-games)</label>
+              <label class="switch"
+                ><input type="checkbox" id="hidePlayables" />
+                <div class="track"></div
+              ></label>
+            </div>
+            <div class="toggle-row">
+              <label>Ads and promoted content</label>
+              <label class="switch"
+                ><input type="checkbox" id="hideAds" checked />
+                <div class="track"></div
+              ></label>
+            </div>
+            <div class="toggle-row">
+              <label
+                >Clickbait titles
+                <span class="hint-inline"
+                  >ALL CAPS, excessive punctuation, bait phrases, emoji
+                  spam</span
+                ></label
+              >
+              <label class="switch"
+                ><input type="checkbox" id="hideClickbait" checked />
+                <div class="track"></div
+              ></label>
+            </div>
+            <div class="toggle-row">
+              <label
+                >Toxic and manipulative content
+                <span class="hint-inline"
+                  >Rage bait, drama, fear-mongering, scams, false urgency</span
+                ></label
+              >
+              <label class="switch"
+                ><input type="checkbox" id="hideToxic" checked />
+                <div class="track"></div
+              ></label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ LOG ═══ -->
+      <div class="panel" id="panel-log">
+        <div class="log-controls">
+          <div class="log-count" id="logCount">0 entries</div>
+          <div class="btn-row" style="margin: 0">
+            <button class="btn" id="refreshLogBtn">Refresh</button>
+            <button class="btn btn-accent" id="clearLogBtn">Clear all</button>
+          </div>
+        </div>
+        <div class="log-table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>time</th>
+                <th>title</th>
+                <th>channel</th>
+                <th>dur</th>
+                <th>reason</th>
+              </tr>
+            </thead>
+            <tbody id="logBody">
+              <tr>
+                <td colspan="5" class="log-empty">
+                  No entries yet. Browse YouTube to see filtered videos here.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ═══ PRESETS ═══ -->
+      <div class="panel active" id="panel-presets">
+        <div class="section">
+          <div class="section-head">
+            <h3>Ready-made presets</h3>
+          </div>
+          <div class="section-body">
+            <div class="preset-grid" id="builtinPresets"></div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-head">
+            <h3>Your saved presets</h3>
+            <button class="btn btn-green btn-sm" id="savePresetBtn">
+              + Save current settings
+            </button>
+          </div>
+          <div class="section-body">
+            <div class="preset-grid" id="userPresets"></div>
+            <div class="log-empty" id="noUserPresets" style="padding: 20px">
+              No saved presets yet. Click "Save current settings" to save your
+              setup.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ IMPORT/EXPORT ═══ -->
+      <div class="panel" id="panel-io">
+        <div class="io-section">
+          <div class="io-box">
+            <h4>Export your settings</h4>
+            <textarea id="exportArea" readonly></textarea>
+            <div class="btn-row">
+              <button class="btn btn-green" id="copyExportBtn">
+                Copy to clipboard
+              </button>
+              <button class="btn" id="downloadExportBtn">Download file</button>
+            </div>
+          </div>
+          <div class="io-box">
+            <h4>Import settings</h4>
+            <textarea
+              id="importArea"
+              placeholder="Paste your settings here..."
+            ></textarea>
+            <div class="btn-row">
+              <button class="btn btn-accent" id="applyImportBtn">Apply</button>
+              <button class="btn" id="loadFileBtn">Load from file</button>
+              <input
+                type="file"
+                id="fileInput"
+                accept=".json"
+                style="display: none"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Save preset modal -->
+    <div class="modal-overlay" id="saveModal">
+      <div class="modal">
+        <h3>Save current settings as a preset</h3>
+        <div class="field">
+          <label class="field-label">Name</label>
+          <input
+            type="text"
+            id="presetNameInput"
+            placeholder="e.g. My clean feed"
+          />
+        </div>
+        <div class="field">
+          <label class="field-label"
+            >Description <span class="hint">(optional)</span></label
+          >
+          <input
+            type="text"
+            id="presetDescInput"
+            placeholder="What does this preset do?"
+          />
+        </div>
+        <div class="btn-row">
+          <button class="btn" id="cancelSaveBtn">Cancel</button>
+          <button class="btn btn-green" id="confirmSaveBtn">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Onboarding overlay (first run) -->
+    <div class="modal-overlay" id="onboarding">
+      <div class="modal" style="width: 520px; max-width: 95vw">
+        <h3 style="font-size: 16px; margin-bottom: 6px">
+          Welcome to YT Video Filter
+        </h3>
+        <p
+          style="
+            font-size: 12px;
+            color: var(--text);
+            margin-bottom: 20px;
+            line-height: 1.6;
+          "
+        >
+          Clean up your YouTube feed by filtering out content you don't want to
+          see.<br />
+          Pick a starting point below, or skip to set things up yourself.
+        </p>
+        <div style="display: grid; gap: 10px" id="onboardingPresets">
+          <button class="onb-pick" data-preset="clean-feed">
+            <strong>Clean Feed</strong>
+            <span
+              >Remove Shorts, mixes, live, playables. Just regular videos.</span
+            >
+          </button>
+          <button class="onb-pick" data-preset="no-clickbait">
+            <strong>No Clickbait</strong>
+            <span
+              >Filter out ALL CAPS titles, excessive punctuation, and bait
+              phrases.</span
+            >
+          </button>
+          <button class="onb-pick" data-preset="focus-mode">
+            <strong>Focus Mode</strong>
+            <span
+              >Only 10-60 min unwatched videos. Maximum distraction
+              reduction.</span
+            >
+          </button>
+        </div>
+        <div class="btn-row" style="margin-top: 18px; justify-content: center">
+          <button class="btn" id="onboardingSkip">
+            Skip — I'll set it up myself
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script src="options.js"></script>
+  </body>
+</html>
