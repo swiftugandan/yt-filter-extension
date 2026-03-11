@@ -68,14 +68,19 @@ export async function POST(req: NextRequest) {
 async function classifyWithLLM(titles: string[]): Promise<ClassifyResult[]> {
   const userMessage = `Classify these ${titles.length} YouTube video titles:\n${JSON.stringify(titles)}`;
 
+  const model = getModel();
+  const supportsJsonFormat = !model.includes("/");
+
   const completion = await getOpenAI().chat.completions.create({
-    model: getModel(),
+    model,
     messages: [
       { role: "system", content: SYSTEM_PROMPT },
       { role: "user", content: userMessage },
     ],
     temperature: 0.1,
-    response_format: { type: "json_object" },
+    ...(supportsJsonFormat && {
+      response_format: { type: "json_object" as const },
+    }),
   });
 
   const raw = completion.choices[0]?.message?.content;
@@ -84,7 +89,10 @@ async function classifyWithLLM(titles: string[]): Promise<ClassifyResult[]> {
   }
 
   try {
-    const parsed = JSON.parse(raw);
+    // Extract JSON from markdown code blocks if present
+    const jsonMatch = raw.match(/```(?:json)?\s*([\s\S]*?)```/);
+    const jsonStr = jsonMatch ? jsonMatch[1].trim() : raw.trim();
+    const parsed = JSON.parse(jsonStr);
     // LLM might wrap in { "results": [...] } or return array directly
     const arr = Array.isArray(parsed) ? parsed : parsed.results;
     const validated = llmOutputSchema.safeParse(arr);

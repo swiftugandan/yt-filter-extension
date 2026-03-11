@@ -10,10 +10,13 @@
     "test": "pnpm --filter @ytf/extension run test",
     "dev": "pnpm --filter @ytf/extension run dev",
     "dev:server": "pnpm --filter @ytf/server run dev",
+    "dev:landing": "pnpm --filter @ytf/landing run dev",
+    "build:landing": "pnpm --filter @ytf/landing run build",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "package": "pnpm build:ext && cd packages/extension/dist && zip -r ../../../yt-video-filter.zip . -x '*.DS_Store'",
     "prepare": "husky"
   },
   "lint-staged": {
